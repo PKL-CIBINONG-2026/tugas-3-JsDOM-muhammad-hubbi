@@ -373,6 +373,11 @@ const render = () => {
       findBestUpgrade(character, slot),
     ]),
   );
+  const bestUpgrade = Object.values(bestBySlot)
+    .filter(Boolean)
+    .reduce((best, candidate) =>
+      best === null || candidate.scoreGain > best.scoreGain ? candidate : best,
+    null);
 
   const selectedItems = character.inventory.filter((item) => {
     return activeRarity === "all" || item.rarity === activeRarity;
@@ -389,9 +394,8 @@ const render = () => {
               .join("");
 
             const isConsumable = item.slot === "consumable";
-            // const best = isConsumable ? null : bestBySlot[item.slot];
-            const badge = bestBySlot[item.slot]
-              ? `<span class="badge badge-upgrade">▲ Best Upgrade (+${bestBySlot[item.slot].scoreGain})</span>`
+            const badge = !isConsumable && bestUpgrade?.itemName === item.name
+              ? `<span class="badge badge-upgrade">▲ Best Upgrade (+${bestUpgrade.scoreGain})</span>`
               : "";
             // console.log(badge);
             // console.log(item.slot);
