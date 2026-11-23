@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPG Character & Inventory Manager</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --border: #334155;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #3b82f6;
+        --success: #10b981;
+        --danger: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        padding: 2rem;
+        line-height: 1.5;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        gap: 1.5rem;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 1.5rem;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .stat-box {
+        background: var(--bg);
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      /* Equipment Slots */
+      .slot-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.6rem;
+        border: 1px solid var(--border);
+      }
+      .slot-title {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .empty-text {
+        color: var(--muted);
+        font-style: italic;
+        font-size: 0.9rem;
+      }
+
+      /* Filter Tabs */
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .tab-btn {
+        background: var(--bg);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      /* Inventory List */
+      .inv-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg);
+        padding: 0.85rem;
+        border-radius: 8px;
+        margin-bottom: 0.6rem;
+        border: 1px solid var(--border);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.4rem;
+      }
+      .badge-upgrade {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+      .badge-rarity {
+        background: #334155;
+        color: #e2e8f0;
+      }
+      .bonus-text {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+      }
+
+      /* Buttons & Log */
+      button.action-btn {
+        padding: 0.45rem 0.85rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .btn-equip {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-use {
+        background: var(--success);
+        color: white;
+      }
+      .btn-unequip {
+        background: var(--danger);
+        color: white;
+      }
+      .btn-reset {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .log-list {
+        list-style: none;
+        font-size: 0.85rem;
+        color: var(--muted);
+        max-height: 110px;
+        overflow-y: auto;
+      }
+      .log-list li {
+        padding: 0.25rem 0;
+        border-bottom: 1px dashed var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <header>
+        <div>
+          <h1 id="char-header">Character Sheet</h1>
+        </div>
+        <button class="btn-reset" data-action="reset">Reset Data</button>
+      </header>
+
+      <div class="grid-2">
+        <!-- Kolom Kiri: Total Stats & Equipped -->
+        <div class="card">
+          <h2>Total Stats</h2>
+          <div id="stats-container" class="stats-grid"></div>
+
+          <h2>Equipped Gear</h2>
+          <div id="equipped-container"></div>
+        </div>
+
+        <!-- Kolom Kanan: Filter & Inventory -->
+        <div class="card">
+          <h2>Inventory</h2>
+          <div id="filter-container" class="filters"></div>
+          <div id="inventory-container"></div>
+        </div>
+      </div>
+
+      <!-- Log Aktivitas -->
+      <div class="card">
+        <h2>Activity Log</h2>
+        <ul id="log-container" class="log-list"></ul>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
